@@ -17,14 +17,14 @@ public class MergeSort<N extends Comparable<N>> extends RecursiveTask<List<N>> {
             return this.arrayOfElements;
         else {
             final int pivot = this.arrayOfElements.size() / 2;
-            MergeSort<N> leftTask = new MergeSort<N>(this.arrayOfElements.subList(0, pivot));
-            MergeSort<N> rightTask = new MergeSort<N>(this.arrayOfElements.subList(pivot, this.arrayOfElements.size()));
+            MergeSort<N> threadLeft = new MergeSort<N>(this.arrayOfElements.subList(0, pivot));
+            MergeSort<N> threadRight = new MergeSort<N>(this.arrayOfElements.subList(pivot, this.arrayOfElements.size()));
 
-            leftTask.fork();
-            rightTask.fork();
+            threadLeft.fork();
+            threadRight.fork();
 
-            List<N> left = leftTask.join();
-            List<N> right = rightTask.join();
+            List<N> left = threadLeft.join();
+            List<N> right = threadRight.join();
 
             return merge(left, right);
         }
