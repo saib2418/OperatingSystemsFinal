@@ -1,98 +1,113 @@
-//package report;
 
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 
-public class QuickSort
-        extends RecursiveTask<Integer> {
+public class QuickSort extends RecursiveTask<Integer> {
 
-    int head, tail;
-    int[] arrayOfElements;
+	int first, last;
+	int[] array;
 
-    private int partion(int head, int tail, int[] arrayOfElements) {
+	private int partition(int first, int last, int[] array) {
 
-        int i = head, j = tail;
+		int i = first;
+		int j = last;
+		int pivot = new Random().nextInt(j - i) + i;
+		int temp = array[j];
+		
+		array[j] = array[pivot];
+		array[pivot] = temp;
+		j--;
 
+		while (i <= j) {
 
-        int pivote = new Random()
-                .nextInt(j - i)
-                + i;
+			if (array[i] <= array[last]) {
+				
+				i++;
+				continue;
+				
+			}
 
+			if (array[j] >= array[last]) {
+				
+				j--;
+				continue;
+				
+			}
 
-        int temp = arrayOfElements[j];
-        arrayOfElements[j] = arrayOfElements[pivote];
-        arrayOfElements[pivote] = temp;
-        j--;
+			temp = array[j];
+			array[j] = array[i];
+			array[i] = temp;
+			j--;
+			i++;
+			
+		}
 
+		temp = array[j + 1];
+		array[j + 1] = array[last];
+		array[last] = temp;
+		return j + 1;
+		
+	}
 
-        while (i <= j) {
+	public QuickSort(int start, int end, int[] arr) {
+		
+		this.array = arr;
+		this.first = start;
+		this.last = end;
+		
+	}
 
-            if (arrayOfElements[i] <= arrayOfElements[tail]) {
-                i++;
-                continue;
-            }
+	@Override
+	protected Integer compute() {
+		
+		if (array.length > 100) {
+			
+			//QuickSort
 
-            if (arrayOfElements[j] >= arrayOfElements[tail]) {
-                j--;
-                continue;
-            }
+			if (first >= last) {
+				
+				return null;
+				
+			}
+			
+			int pivot = partition(first, last, array);
 
-            temp = arrayOfElements[j];
-            arrayOfElements[j] = arrayOfElements[i];
-            arrayOfElements[i] = temp;
-            j--;
-            i++;
-        }
+			QuickSort left = new QuickSort(first, pivot - 1, array);
 
+			QuickSort right = new QuickSort(pivot + 1, last, array);
 
-        temp = arrayOfElements[j + 1];
-        arrayOfElements[j + 1] = arrayOfElements[tail];
-        arrayOfElements[tail] = temp;
-        return j + 1;
-    }
+			left.fork();
+			
+			right.compute();
 
+			left.join();
 
-    public QuickSort(int head, int tail, int[] arr) {
-        this.arrayOfElements = arr;
-        this.head = head;
-        this.tail = tail;
-    }
+		} else {
 
-    @Override
-    protected Integer compute() {
+			//Insertion Sort
+			
+			int length = array.length;
+			
+			for (int i = 1; i < length; ++i) {
+				
+				int key = array[i];
+				int j = i - 1;
 
-        if (head >= tail)
-            return null;
+				while (j >= 0 && array[j] > key) {
+					
+					array[j + 1] = array[j];
+					j = j - 1;
+					
+				}
+				
+				array[j + 1] = key;
+				
+			}
+		}
+		
+		return null;
+		
+	}
 
-        int p = partion(head, tail, arrayOfElements);
-        QuickSort threadLeft = new QuickSort(head, p - 1, arrayOfElements);
-        QuickSort threadRight = new QuickSort(p + 1, tail, arrayOfElements);
-
-
-        threadLeft.fork();
-        threadRight.compute();
-
-
-        threadLeft.join();
-
-
-        return null;
-    }
-
-
-    public static void main(String args[]) {
-
-        int[] inputArray = {7, 12, 19, 3, 18, 4, 2, 6, 15, 8, 10};
-        int n = inputArray.length;
-
-
-        ForkJoinPool pool = ForkJoinPool.commonPool();
-
-
-        pool.invoke(new QuickSort(0, n - 1, inputArray));
-
-        for (int i = 0; i < n; i++)
-            System.out.print(inputArray[i] + " ");
-    }
 }
