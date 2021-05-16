@@ -11,25 +11,6 @@ public class MergeSort<N extends Comparable<N>> extends RecursiveTask<List<N>> {
         this.arrayOfElements = new ArrayList<>(elements);
     }
 
-    @Override
-    protected List<N> compute() {
-        if (this.arrayOfElements.size() <= 1)
-            return this.arrayOfElements;
-        else {
-            final int pivot = this.arrayOfElements.size() / 2;
-            MergeSort<N> threadLeft = new MergeSort<N>(this.arrayOfElements.subList(0, pivot));
-            MergeSort<N> threadRight = new MergeSort<N>(this.arrayOfElements.subList(pivot, this.arrayOfElements.size()));
-
-            threadLeft.fork();
-            threadRight.fork();
-
-            List<N> left = threadLeft.join();
-            List<N> right = threadRight.join();
-
-            return merge(left, right);
-        }
-    }
-
     private List<N> merge(List<N> left, List<N> right) {
         List<N> sorted = new ArrayList<>();
         while (!left.isEmpty() || !right.isEmpty()) {
@@ -47,6 +28,42 @@ public class MergeSort<N extends Comparable<N>> extends RecursiveTask<List<N>> {
 
         return sorted;
     }
+
+    @Override
+    protected List<N> compute() {
+
+        if (this.arrayOfElements.size() <= 1) {
+            return this.arrayOfElements;
+        }
+        if (arrayOfElements.size() < 100) {
+            final int pivot = this.arrayOfElements.size() / 2;
+            MergeSort<N> threadLeft = new MergeSort<N>(this.arrayOfElements.subList(0, pivot));
+            MergeSort<N> threadRight = new MergeSort<N>(this.arrayOfElements.subList(pivot, this.arrayOfElements.size()));
+
+            threadLeft.fork();
+            threadRight.fork();
+
+            List<N> left = threadLeft.join();
+            List<N> right = threadRight.join();
+            return merge(left, right);
+
+        } else {
+            //Insertion Sort
+
+            for (int j = 1; j < arrayOfElements.size(); j++) {
+                N current = arrayOfElements.get(j);
+                int i = j - 1;
+                while ((i > -1) && ((arrayOfElements.get(i).compareTo(current)) > 0)) {
+                    arrayOfElements.set(i + 1, arrayOfElements.get(i));
+                    i--;
+                }
+                arrayOfElements.set(i + 1, current);
+            }
+            return null;
+        }
+
+    }
+
 
     public static void main(String[] args) {
         ForkJoinPool forkJoinPool = ForkJoinPool.commonPool();
